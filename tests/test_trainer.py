@@ -1,7 +1,11 @@
-from models import Net
+import os
+import tempfile
+
+import pytest
 import torch
 import torch.nn as nn
-import pytest
+from models import Net
+
 from tests.test_models import parsing_batch
 
 
@@ -38,3 +42,13 @@ class TestNet:
         loss_c, loss_s = model.calc_loss(style_feats, t, g_t)
         assert list(loss_c.shape) == []
         assert list(loss_s.shape) == []
+
+    def test_save_model(self, model):
+        temp_f = tempfile.TemporaryDirectory()
+        path = temp_f.name
+        path = os.path.join(path, "model.pt.zip")
+        state_dict = model.state_dict()
+        torch.save(state_dict, path)
+        assert os.path.exists(path)
+        state_dict = torch.load(path)
+        model.load_state_dict(state_dict)
