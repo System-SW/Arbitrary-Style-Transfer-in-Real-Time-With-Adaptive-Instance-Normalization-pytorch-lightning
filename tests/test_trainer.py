@@ -37,12 +37,6 @@ class TestNet:
         assert g_t.shape == content.shape
         model.train(True)
 
-    def test_calc_loss(self, train_output, model):
-        g_t, t, style_feats = train_output
-        loss_c, loss_s = model.calc_loss(style_feats, t, g_t)
-        assert list(loss_c.shape) == []
-        assert list(loss_s.shape) == []
-
     def test_save_model(self, model):
         temp_f = tempfile.TemporaryDirectory()
         path = temp_f.name
