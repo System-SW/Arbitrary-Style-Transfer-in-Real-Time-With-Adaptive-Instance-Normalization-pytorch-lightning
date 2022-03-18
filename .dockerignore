@@ -1,0 +1,17 @@
+# IDE
+.vscode/
+
+# DATASET
+**/DATASET/**
+
+# models
+*.zip
+*.pt.zip
+*.pt
+*.pth
+*.onnx
+
+# Log
+tensorboard/
+wandb/
+github/
