@@ -19,3 +19,7 @@
 # Log
 tensorboard/
 wandb/
+
+# ETC
+image
+image2mp4.py
