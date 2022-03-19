@@ -69,7 +69,6 @@ class Net(pl.LightningModule):
         )
 
     def forward(self, content, style, alpha=1.0):
-        assert 0 <= alpha <= 1
         style_feats = self.encode_with_intermediate(style)
         content_feat = self.encode(content)
         t = self.AdaIN(content_feat, style_feats[-1])

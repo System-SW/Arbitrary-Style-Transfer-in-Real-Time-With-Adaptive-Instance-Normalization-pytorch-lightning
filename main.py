@@ -49,6 +49,7 @@ def main():
 
     # logger
     parser.add_argument("--upload_artifacts", action="store_true")
+    parser.add_argument("--onnx_opset_version", type=int, default=11)
     parser.add_argument("--max_image_count", type=int, default=8)
 
     args = pl.Trainer.parse_argparser(parser.parse_args())
@@ -65,13 +66,14 @@ def training(args):
     style_dataloader = build_dataloader(args, args.style_root_dir)
 
     ############### MODEL ################
-    decoder = Decoder()
     encoder = Encoder()
-    if os.path.exists(args.decoder):
-        print("decoder loadd!")
-        decoder.load_state_dict(torch.load(args.decoder))
     encoder.load_state_dict(torch.load(args.encoder))
     encoder = nn.Sequential(*list(encoder.children())[:31])
+
+    decoder = Decoder()
+    if os.path.exists(args.decoder):
+        print("decoder load!")
+        decoder.load_state_dict(torch.load(args.decoder, map_location="cpu"))
 
     model = Net(args, encoder=encoder, decoder=decoder)
 
@@ -90,7 +92,12 @@ def training(args):
             monitor="loss",
             mode="min",
             dirpath=os.path.join(save_dir, "ckpt"),
-            filename="[{step:06d}]-[{loss:.4f}]",
+            filename=(
+                "[{step:06d}]-"
+                "[{loss:.4f}]-"
+                "[{content_loss:.4f}-"
+                "[{style_loss:.4f}]]"
+            ),
             auto_insert_metric_name=False,
             save_top_k=3,
             save_last=True,
@@ -114,15 +121,53 @@ def training(args):
     trainer.fit(model, dataloader)
 
     ############## ARTIFACTS ###############
-    path = os.path.join(logger.experiment.dir, "AdaIN.pth")
+    decoder_state_dict_path = os.path.join(logger.experiment.dir, "decoder.pth")
+    state_dict = model.decoder.state_dict()
+    torch.save(state_dict, decoder_state_dict_path)
+
+    state_dict_path = os.path.join(logger.experiment.dir, "AdaIN.pth")
     state_dict = model.state_dict()
-    torch.save(state_dict, path)
+    torch.save(state_dict, state_dict_path)
+
+    example_inputs = (
+        torch.rand([1, 3, 256, 256]),
+        torch.rand([1, 3, 256, 256]),
+        torch.zeros(1),
+    )
+
+    torchscript_path = os.path.join(logger.experiment.dir, "AdaIN.pt.zip")
+    model.to_torchscript(
+        torchscript_path, "trace", example_inputs=example_inputs
+    )
+
+    onnx_path = os.path.join(logger.experiment.dir, "AdaIN.onnx")
+    input_names = ["content", "style", "alpha"]
+    output_names = ["output"]
+    dynamic_axes = {
+        input_names[0]: {0: "batch_size"},
+        input_names[1]: {0: "batch_size"},
+        input_names[2]: {0: "batch_size"},
+        output_names[0]: {0: "batch_size"},
+    }
+
+    model.to_onnx(
+        file_path=onnx_path,
+        input_sample=example_inputs,
+        export_params=True,
+        input_names=input_names,
+        output_names=output_names,
+        opset_version=args.onnx_opset_version,
+        dynamic_axes=dynamic_axes,
+    )
 
     if args.upload_artifacts:
         artifacts = wandb.Artifact(
             "Adaptive-Instance-Normalization", type="model"
         )
-        artifacts.add_file(path, "weight")
+        artifacts.add_file(state_dict_path, "weight")
+        artifacts.add_file(decoder_state_dict_path, "decoder_weight")
+        artifacts.add_file(torchscript_path, "torchscript")
+        artifacts.add_file(onnx_path, "onnx")
         logger.log_artifact(artifacts)
 
 
