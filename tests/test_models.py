@@ -1,10 +1,9 @@
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import pytest
 import torch
 import torch.nn as nn
 from models import AdaptiveInstanceNormalization as AdaIN
-from models import Net
 
 
 def parsing_batch(
@@ -65,13 +64,3 @@ class TestModels:
         styled_content = adain(content, style)
 
         assert styled_content.shape == content.shape
-
-
-class TestTrainer:
-    @pytest.fixture(scope="class")
-    def model(self, args):
-        return Net(args)
-
-    @pytest.fixture(scope="class")
-    def test(self, args):
-        return Net(args)
