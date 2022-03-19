@@ -120,7 +120,10 @@ def training(args):
     trainer.fit(model, dataloader)
 
     ############## ARTIFACTS ###############
-    decoder_state_dict_path = os.path.join(logger.experiment.dir, "decoder.pth")
+    decoder_state_dict_path = os.path.join(
+        logger.experiment.dir,
+        "decoder.pth",
+    )
     state_dict = model.decoder.state_dict()
     torch.save(state_dict, decoder_state_dict_path)
 
