@@ -1,3 +1,4 @@
+import tempfile
 import pytest
 from easydict import EasyDict
 import torch
@@ -14,6 +15,7 @@ def args():
             "image_size": 256,
             "batch_size": 2,
             "encoder": "weights/vgg.pht",
+            "onnx_opset_version": 11,
         }
     )
 
@@ -22,7 +24,7 @@ def tensor(batch_size, size):
     return torch.zeros([batch_size, 3, size, size])
 
 
-def image(size):
+def build_image(size):
     return np.zeros([size, size, 3], dtype=np.uint8)
 
 
@@ -36,7 +38,7 @@ def batch(args):
 
 @pytest.fixture(scope="session")
 def image_batch(args):
-    return image(args.image_size)
+    return build_image(args.image_size)
 
 
 @pytest.fixture(scope="session")
@@ -46,6 +48,11 @@ def decoder():
 
 @pytest.fixture(scope="session")
 def encoder():
-    vgg = Encoder()
-    vgg = nn.Sequential(*list(vgg.children())[:31])
-    return vgg
+    encoder = Encoder()
+    encoder = nn.Sequential(*list(encoder.children())[:31])
+    return encoder
+
+
+@pytest.fixture(scope="session")
+def temp_dir_f():
+    return tempfile.TemporaryDirectory()
