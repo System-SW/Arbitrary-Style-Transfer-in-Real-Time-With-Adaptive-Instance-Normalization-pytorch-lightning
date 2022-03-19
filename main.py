@@ -25,7 +25,6 @@ def main():
 
     parser.add_argument("--seed", type=int, default=9423)
     parser.add_argument("--logdir", type=str, default="experiment")
-    parser.add_argument("--device", type=str, default="cpu")
 
     # data
     parser.add_argument("--content_root_dir", type=str)
