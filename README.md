@@ -4,11 +4,6 @@ Unofficial pytorch-lightning implementation of a paper, "[Arbitrary Style Transf
 
 
 # Requirements
-Install requirements by pip
-``` shell 
-pip install -r requirements.txt 
-```
-
 - torch==1.10.1
 - torchvision==0.11.2
 - pytorch-lightning==1.5.7
@@ -18,7 +13,13 @@ pip install -r requirements.txt
 - easydict==1.9
 - onnxruntime==1.10.0
 
-Install dependency by docker 
+## Install requirements by pip
+``` shell 
+pip install -r requirements.txt 
+```
+
+
+## Install dependency by docker 
 ```shell
 docker-compose up -d 
 ```
@@ -40,6 +41,7 @@ docker-compose up -d
 2. download Encoder weights and mv to weights dir 
 3. check dataset path 
 4. run script 
+
 ```bash 
 python main.py \
 --content_root_dir="{YOUR CONTENT DATASET PATH}" \
@@ -71,9 +73,7 @@ python main.py \
 </details>
 
 
-
-
-# Using APP 
+# [APP](https://neural-style-transfer-76.herokuapp.com/)
 
 Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
 ](https://github.com/kairavkkp/Neural-Style-Transfer-Streamlit)"
@@ -85,11 +85,11 @@ Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
 <details>
 <summary> Menual </summary>
 
-## Requirements
 
-1. download "Torchscript" model to "app/src" directory 
+## 1. Download "Torchscript" model to "app/src" directory 
 
-2. Install APP dependency by pip 
+## 2. Install APP dependency by pip 
+
 
 ``` shell 
 cd app
@@ -102,19 +102,20 @@ pip install -r requirements.txt
 - streamlit==1.7.0
 - opencv-python-headless==4.5.5.62
 
-2. Install AdaIN app by docker 
+## 2. Install AdaIN app by docker 
 
-docker env
+
+## 2.1. docker env
 - MODEL_PATH : torchscript file path
+
+## 2.2. Start container 
 
 ```shell
 cd app
 docker-compose up -d 
 ```
 
-
-
-
+  
 </details>
 
 
