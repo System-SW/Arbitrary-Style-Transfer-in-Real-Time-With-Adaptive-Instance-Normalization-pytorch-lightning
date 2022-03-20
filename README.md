@@ -18,7 +18,6 @@ pip install -r requirements.txt
 - easydict==1.9
 - onnxruntime==1.10.0
 
-# Install by Docker
 Install dependency by docker 
 ```shell
 docker-compose up -d 
@@ -27,10 +26,9 @@ docker-compose up -d
 # Pretrained weights / models download
 
 - **Encoder(VGG)** weights download by ["pytorch-AdaIN"](https://github.com/naoto0804/pytorch-AdaIN#download-models) repo 
-- **Decoder** weights download by [link]() # TODO
-- **Net pl module ** weights download by [link]() # TODO
-- **Torchscript** model download by [link]() # TODO
-- **Net onnx** model download by [link]() # TODO
+- **Decoder** weights download by [link](https://drive.google.com/file/d/1tjKtRpvLV6_IywKpBjtj-7l_V9yhNfK-/view?usp=sharing)
+- **Net Torchscript** model download by [link](https://drive.google.com/file/d/1aw9eJQisq04Gi7VANnlJeGBgqdcjNWRZ/view?usp=sharing)
+- **Net onnx** model download by [link](https://drive.google.com/file/d/1HdrMmLoI7o469X_UXtJr6NKbMfd271ub/view?usp=sharing)
 
 # Dataset 
 - content : [COCO DATASET](http://images.cocodataset.org/zips/train2017.zip)
@@ -88,8 +86,13 @@ Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
 <summary> Menual </summary>
 
 ## Requirements
-Install requirements by pip
+
+1. download "Torchscript" model to "app/src" directory 
+
+2. Install APP dependency by pip 
+
 ``` shell 
+cd app
 pip install -r requirements.txt 
 ```
 
@@ -99,14 +102,16 @@ pip install -r requirements.txt
 - streamlit==1.7.0
 - opencv-python-headless==4.5.5.62
 
-## Install by Docker
-Install dependency by docker 
+2. Install AdaIN app by docker 
+
+docker env
+- MODEL_PATH : torchscript file path
+
 ```shell
+cd app
 docker-compose up -d 
 ```
 
-## ENV 
-- MODEL_PATH : torchscript file path
 
 
 
