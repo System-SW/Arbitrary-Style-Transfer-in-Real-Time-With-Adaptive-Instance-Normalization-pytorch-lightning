@@ -27,10 +27,10 @@ docker-compose up -d
 # Pretrained weights / models download
 
 - **Encoder(VGG)** weights download by ["pytorch-AdaIN"](https://github.com/naoto0804/pytorch-AdaIN#download-models) repo 
-- **Decoder** weights download by [link]()
-- **Net pl module ** weights download by [link]()
-- **Torchscript** model download by [link]()
-- **Net onnx** model download by [link]()
+- **Decoder** weights download by [link]() # TODO
+- **Net pl module ** weights download by [link]() # TODO
+- **Torchscript** model download by [link]() # TODO
+- **Net onnx** model download by [link]() # TODO
 
 # Dataset 
 - content : [COCO DATASET](http://images.cocodataset.org/zips/train2017.zip)
@@ -55,6 +55,8 @@ python main.py \
 
 
 # Training result 
+
+
 <details>
 <summary> result plot, images </summary>
 
@@ -65,16 +67,54 @@ python main.py \
 
 ## sample images 
 
+![video](./src/video/training_sample.gif)
 - [video](./src/video/training_sample.mp4)
 
 </details>
 
 
+
+
 # Using APP 
 
-TODO 
+Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
+](https://github.com/kairavkkp/Neural-Style-Transfer-Streamlit)"
+
+![app_01](./src/app/01.png)
+![app_02](./src/app/02.png)
+
+
+<details>
+<summary> Menual </summary>
+
+## Requirements
+Install requirements by pip
+``` shell 
+pip install -r requirements.txt 
+```
+
+- torch==1.10.1
+- torchvision==0.11.2
+- pytorch-lightning==1.5.7
+- streamlit==1.7.0
+- opencv-python-headless==4.5.5.62
+
+## Install by Docker
+Install dependency by docker 
+```shell
+docker-compose up -d 
+```
+
+## ENV 
+- MODEL_PATH : torchscript file path
+
+
+
+</details>
 
 
 # References
 - [Arbitrary Style Transfer in Real-time with Adaptive Instance Normalization](https://arxiv.org/pdf/1703.06868.pdf)
 - [pytorch-AdaIN](https://github.com/naoto0804/pytorch-AdaIN#download-models) 
+- [Neural-Style-Transfer-Streamlit
+](https://github.com/kairavkkp/Neural-Style-Transfer-Streamlit)
