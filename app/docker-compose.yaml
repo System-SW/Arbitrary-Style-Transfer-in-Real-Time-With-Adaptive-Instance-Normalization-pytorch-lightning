@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  adain:
+    build: .
+    container_name: AdaIN
+    ports:
+      - "8501:8501"
+    environment:
+      TZ: "Asia/Seoul"
+      MODEL_PATH: "./src/AdaIN.pt.zip"
