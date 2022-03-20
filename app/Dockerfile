@@ -1,5 +1,5 @@
 FROM python:3.8.12-slim-buster
-EXPOSE 8501
+EXPOSE $PORT
 WORKDIR /app
 
 RUN apt-get update && apt install -y \ 
@@ -13,9 +13,8 @@ RUN pip install --no-cache-dir \
     streamlit==1.7.0 \ 
     opencv-python-headless==4.5.5.62
 
-
 ENV MODEL_PATH ./src/AdaIN.pt.zip
 
 COPY . /app
-ENTRYPOINT ["streamlit", "run"]
-CMD ["app.py"]
+
+CMD ["sh", "-c", "streamlit run --server.address=0.0.0.0 --server.port $PORT /app/app.py"]
