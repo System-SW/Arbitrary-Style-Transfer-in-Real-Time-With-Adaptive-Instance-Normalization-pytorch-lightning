@@ -13,8 +13,6 @@ Unofficial pytorch-lightning implementation of a paper, "[Arbitrary Style Transf
 - easydict==1.9
 - onnxruntime==1.10.0
 
----
-
 ## Install requirements by pip
 ``` shell 
 pip install -r requirements.txt 
@@ -75,8 +73,6 @@ python main.py \
 </details>
 
 
-
-
 # [APP](https://neural-style-transfer-76.herokuapp.com/)
 
 Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
@@ -93,6 +89,7 @@ Streamlit app source code referenced "[Neural-Style-Transfer-Streamlit
 ## 1. Download "Torchscript" model to "app/src" directory 
 
 ## 2. Install APP dependency by pip 
+
 
 ``` shell 
 cd app
@@ -118,10 +115,7 @@ cd app
 docker-compose up -d 
 ```
 
-
-
-
-
+  
 </details>
 
 
