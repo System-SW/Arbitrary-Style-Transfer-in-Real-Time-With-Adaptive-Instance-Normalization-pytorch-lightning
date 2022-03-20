@@ -40,12 +40,12 @@ with st.form("Control panel"):
 
     content_size = st.select_slider(
         "content size",
-        [128, 256, 512, 1024, "No Resize"],
+        [128, 256, 512, 1024],
         value=1024,
     )
     style_size = st.select_slider(
         "style size",
-        [128, 256, 512, 1024, "No Resize"],
+        [128, 256, 512, 1024],
         value=128,
     )
     predict = st.form_submit_button("RUN")
