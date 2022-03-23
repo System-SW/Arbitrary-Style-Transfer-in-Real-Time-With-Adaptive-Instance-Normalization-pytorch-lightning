@@ -64,12 +64,10 @@ class TestNet:
         input_names = ["content", "style", "alpha"]
         output_names = ["output"]
         dynamic_axes = {
-            input_names[0]: {0: "batch_size"},
-            input_names[1]: {0: "batch_size"},
-            input_names[2]: {0: "batch_size"},
-            output_names[0]: {0: "batch_size"},
+            input_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+            input_names[1]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+            output_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
         }
-        model.to_torchscript(path, "trace", example_inputs=example_inputs)
         model.to_onnx(
             file_path=path,
             input_sample=example_inputs,
@@ -90,18 +88,20 @@ class TestNet:
             g_t = model(content, style, alpha)
             assert g_t.shape == content.shape
 
-    def test_load_onnx(self, temp_dir_f, example_inputs):
+    @pytest.mark.parametrize("size", [(128, 256), (512, 256)])
+    def test_load_onnx(self, temp_dir_f, example_inputs, size):
         path = os.path.join(temp_dir_f.name, "model.onnx")
         session = onnxruntime.InferenceSession(path)
         content, style, _ = example_inputs
-        content = content.numpy()
+        content = torch.zeros([1, 3, *size]).numpy()
         style = style.numpy()
         inputs_tag = session.get_inputs()
+        outputs_tag = session.get_outputs()
         for alpha in np.arange(0.0, 0.3, 0.1, dtype=np.float32):
             inputs = {
                 inputs_tag[0].name: content,
                 inputs_tag[1].name: style,
                 inputs_tag[2].name: [alpha],
             }
-            g_t = session.run(None, inputs)[0]
+            g_t = session.run([outputs_tag[0].name], inputs)[0]
             assert list(g_t.shape) == list(content.shape)

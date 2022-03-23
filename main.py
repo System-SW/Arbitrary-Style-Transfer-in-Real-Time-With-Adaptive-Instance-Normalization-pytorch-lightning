@@ -60,10 +60,6 @@ def training(args):
     assert os.path.exists(args.encoder), f"{args.encoder} is not found"
     pl.seed_everything(args.seed)
 
-    ########### BUILD DATASET ############
-    content_dataloader = build_dataloader(args, args.content_root_dir)
-    style_dataloader = build_dataloader(args, args.style_root_dir)
-
     ############### MODEL ################
     encoder = Encoder()
     encoder.load_state_dict(torch.load(args.encoder))
@@ -80,7 +76,7 @@ def training(args):
     logger = WandbLogger(
         project=args.project_name,
     )
-    logger.watch(model, log="all", log_freq=args.log_every_n_steps)
+    # logger.watch(model, log="all", log_freq=args.log_every_n_steps)
     save_dir = logger.experiment.dir
     os.makedirs(os.path.join(save_dir, "images"))
 
@@ -111,13 +107,18 @@ def training(args):
         logger=logger,
         callbacks=callbacks,
     )
+    ########### BUILD DATASET ############
+    content_dataloader = build_dataloader(args, args.content_root_dir)
+    style_dataloader = build_dataloader(args, args.style_root_dir)
 
     ############# TRAIN START ##############
-    dataloader = {
-        "content": content_dataloader,
-        "style": style_dataloader,
-    }
-    trainer.fit(model, dataloader)
+    trainer.fit(
+        model,
+        {
+            "content": content_dataloader,
+            "style": style_dataloader,
+        },
+    )
 
     ############## ARTIFACTS ###############
     decoder_state_dict_path = os.path.join(
@@ -146,10 +147,9 @@ def training(args):
     input_names = ["content", "style", "alpha"]
     output_names = ["output"]
     dynamic_axes = {
-        input_names[0]: {0: "batch_size"},
-        input_names[1]: {0: "batch_size"},
-        input_names[2]: {0: "batch_size"},
-        output_names[0]: {0: "batch_size"},
+        input_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        input_names[1]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        output_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
     }
 
     model.to_onnx(
