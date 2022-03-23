@@ -68,7 +68,9 @@ class Net(pl.LightningModule):
             input_std, target_std
         )
 
-    def forward(self, content, style, alpha=1.0):
+    def forward(
+        self, content: torch.Tensor, style: torch.Tensor, alpha: float = 1.0
+    ):
         style_feats = self.encode_with_intermediate(style)
         content_feat = self.encode(content)
         t = self.AdaIN(content_feat, style_feats[-1])
