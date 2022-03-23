@@ -120,17 +120,11 @@ def training(args):
         },
     )
 
-    ############## ARTIFACTS ###############
-    decoder_state_dict_path = os.path.join(
-        logger.experiment.dir,
-        "decoder.pth",
-    )
-    state_dict = model.decoder.state_dict()
-    torch.save(state_dict, decoder_state_dict_path)
-
-    state_dict_path = os.path.join(logger.experiment.dir, "AdaIN.pth")
+    ############## ARTIFACTS MODEL ###############
+    model = model.cpu().eval()
+    model_weights_path = os.path.join(logger.experiment.dir, "model.pth")
     state_dict = model.state_dict()
-    torch.save(state_dict, state_dict_path)
+    torch.save(state_dict, model_weights_path)
 
     example_inputs = (
         torch.rand([1, 3, 256, 256]),
@@ -138,12 +132,14 @@ def training(args):
         torch.zeros(1),
     )
 
-    torchscript_path = os.path.join(logger.experiment.dir, "AdaIN.pt.zip")
+    models_ts_path = os.path.join(logger.experiment.dir, "model.pt.zip")
     model.to_torchscript(
-        torchscript_path, "trace", example_inputs=example_inputs
+        models_ts_path,
+        "trace",
+        example_inputs=example_inputs,
     )
 
-    onnx_path = os.path.join(logger.experiment.dir, "AdaIN.onnx")
+    model_onnx_path = os.path.join(logger.experiment.dir, "AdaIN.onnx")
     input_names = ["content", "style", "alpha"]
     output_names = ["output"]
     dynamic_axes = {
@@ -153,8 +149,88 @@ def training(args):
     }
 
     model.to_onnx(
-        file_path=onnx_path,
+        file_path=model_onnx_path,
         input_sample=example_inputs,
+        export_params=True,
+        input_names=input_names,
+        output_names=output_names,
+        opset_version=args.onnx_opset_version,
+        dynamic_axes=dynamic_axes,
+    )
+
+    ############## ARTIFACTS ENCODER ###############
+    encoder_example_inputs = torch.rand([1, 3, 256, 256])
+    encoder = nn.Sequential(*list(encoder[:31])).cpu().eval()
+    encoder_ts_path = os.path.join(logger.experiment.dir, "encoder.pt.zip")
+    encoder = torch.jit.trace(encoder, example_inputs=encoder_example_inputs)
+    encoder.save(encoder_ts_path)
+
+    input_names = ["input"]
+    output_names = ["output"]
+    dynamic_axes = {
+        input_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        output_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+    }
+    encoder_onnx_path = os.path.join(logger.experiment.dir, "encoder.onnx")
+    torch.onnx.export(
+        encoder,
+        args=encoder_example_inputs,
+        f=encoder_onnx_path,
+        export_params=True,
+        input_names=input_names,
+        output_names=output_names,
+        opset_version=args.onnx_opset_version,
+        dynamic_axes=dynamic_axes,
+    )
+
+    ############## ARTIFACTS DECODER ###############
+    decoder = model.decoder.cpu().eval()
+
+    decoder_weights_path = os.path.join(logger.experiment.dir, "decoder.pth")
+    state_dict = decoder.state_dict()
+    torch.save(state_dict, decoder_weights_path)
+
+    decoder_example_inputs = encoder(encoder_example_inputs)
+    decoder_ts_path = os.path.join(logger.experiment.dir, "decoder.pt.zip")
+    decoder = torch.jit.trace(decoder, example_inputs=decoder_example_inputs)
+    decoder.save(decoder_ts_path)
+
+    decoder_onnx_path = os.path.join(logger.experiment.dir, "decoder.onnx")
+    input_names = ["input"]
+    output_names = ["output"]
+    dynamic_axes = {
+        input_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        output_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+    }
+    torch.onnx.export(
+        decoder,
+        args=decoder_example_inputs,
+        f=decoder_onnx_path,
+        export_params=True,
+        input_names=input_names,
+        output_names=output_names,
+        opset_version=args.onnx_opset_version,
+        dynamic_axes=dynamic_axes,
+    )
+
+    ############## ARTIFACTS ADAIN ###############
+    adain_ts_path = os.path.join(logger.experiment.dir, "adain.pt.zip")
+    adain = torch.jit.script(model.AdaIN.eval())
+    adain.save(adain_ts_path)
+
+    adain_example_inputs = (decoder_example_inputs, decoder_example_inputs)
+    adain_onnx_path = os.path.join(logger.experiment.dir, "adain.onnx")
+    input_names = ["content", "style"]
+    output_names = ["output"]
+    dynamic_axes = {
+        input_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        input_names[1]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+        output_names[0]: {0: "batch_size", 1: "c", 2: "h", 3: "w"},
+    }
+    torch.onnx.export(
+        adain,
+        args=adain_example_inputs,
+        f=adain_onnx_path,
         export_params=True,
         input_names=input_names,
         output_names=output_names,
@@ -166,10 +242,19 @@ def training(args):
         artifacts = wandb.Artifact(
             "Adaptive-Instance-Normalization", type="model"
         )
-        artifacts.add_file(state_dict_path, "weight")
-        artifacts.add_file(decoder_state_dict_path, "decoder_weight")
-        artifacts.add_file(torchscript_path, "torchscript")
-        artifacts.add_file(onnx_path, "onnx")
+        artifacts.add_file(model_weights_path, "model_weight")
+        artifacts.add_file(models_ts_path, "model_torchscript")
+        artifacts.add_file(model_onnx_path, "model_onnx")
+
+        artifacts.add_file(encoder_ts_path, "encoder_torchscript")
+        artifacts.add_file(encoder_onnx_path, "encoder_onnx")
+
+        artifacts.add_file(decoder_weights_path, "decoder_weight")
+        artifacts.add_file(decoder_ts_path, "decoder_torchscript")
+        artifacts.add_file(decoder_onnx_path, "decoder_onnx")
+
+        artifacts.add_file(adain_ts_path, "adain_torchscript")
+        artifacts.add_file(adain_onnx_path, "adain_onnx")
         logger.log_artifact(artifacts)
 
 
