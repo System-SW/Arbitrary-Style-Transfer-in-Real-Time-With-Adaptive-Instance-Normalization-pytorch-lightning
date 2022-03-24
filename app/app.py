@@ -1,5 +1,5 @@
 import streamlit as st
-from app.inference import Model
+from inference import Model
 from utils import (
     TITLE,
     DESC,
