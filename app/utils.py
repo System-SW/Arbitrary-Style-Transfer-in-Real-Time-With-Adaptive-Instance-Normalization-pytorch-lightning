@@ -17,7 +17,8 @@ URL = (
     "With-Adaptive-Instance-Normalization-pytorch-lightning"
 )
 
-MODEL_PATH = os.environ.get("MODEL_PATH")
+ENCODER_PATH = os.environ.get("ENCODER_PATH")
+DECODER_PATH = os.environ.get("DECODER_PATH")
 
 EXT = ["png", "jpeg", "jpg"]
 

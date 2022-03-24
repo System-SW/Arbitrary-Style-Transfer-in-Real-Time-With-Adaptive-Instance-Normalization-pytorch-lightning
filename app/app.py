@@ -1,13 +1,22 @@
 import streamlit as st
-from inferance import Model
-from utils import TITLE, DESC, AUTHOR, URL, MODEL_PATH, EXT, image_load
+from app.inference import Model
+from utils import (
+    TITLE,
+    DESC,
+    AUTHOR,
+    URL,
+    EXT,
+    ENCODER_PATH,
+    DECODER_PATH,
+    image_load,
+)
 
 st.header(TITLE)
 st.text(DESC)
 
 try:
     model_load_state = st.text("Loading Model...")
-    model = Model(MODEL_PATH)
+    model = Model(ENCODER_PATH, DECODER_PATH)
     model_load_state.text("Loading Model...done!")
 except Exception as e:
     model_load_state.text("loading is failed! Check your model!" + str(e))
@@ -36,7 +45,7 @@ with style:
 
 
 with st.form("Control panel"):
-    alpha = st.slider("Alpha", min_value=0.0, max_value=1.0, value=0.5)
+    alpha = st.slider("Alpha", min_value=0.0, max_value=1.0, value=1.0)
 
     content_size = st.select_slider(
         "content size",
@@ -45,7 +54,7 @@ with st.form("Control panel"):
     )
     style_size = st.select_slider(
         "style size",
-        [128, 256, 512, 1024, "No Resize"],
+        [128, 256, 512],
         value=128,
     )
     predict = st.form_submit_button("RUN")
