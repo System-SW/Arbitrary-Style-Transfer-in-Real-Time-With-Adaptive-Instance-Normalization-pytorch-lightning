@@ -1,5 +1,5 @@
 import streamlit as st
-from app.inference import Model
+from inference import Model
 from utils import (
     TITLE,
     DESC,
@@ -49,8 +49,8 @@ with st.form("Control panel"):
 
     content_size = st.select_slider(
         "content size",
-        [128, 256, 512, 1024],
-        value=1024,
+        [128, 256, 512],
+        value=512,
     )
     style_size = st.select_slider(
         "style size",
