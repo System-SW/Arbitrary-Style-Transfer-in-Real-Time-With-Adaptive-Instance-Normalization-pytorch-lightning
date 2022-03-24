@@ -8,13 +8,12 @@ RUN apt-get update && apt install -y \
     libglib2.0-0 && apt-get clean
 
 RUN pip install --no-cache-dir \
-    torch==1.10.1 \ 
-    torchvision==0.11.2 \ 
-    pytorch-lightning==1.5.7 \
     streamlit==1.7.0 \ 
-    opencv-python-headless==4.5.5.62
+    opencv-python-headless==4.5.5.62 \
+    onnxruntime==1.10.0
 
-ENV MODEL_PATH ./src/AdaIN.pt.zip
+ENV ENCODER_PATH ./src/encoder.onnx
+ENV DECODER_PATH ./src/decoder.onnx
 
 COPY . /app
 
